@@ -1,6 +1,7 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from .forms import UserForm
+from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
@@ -30,43 +31,106 @@ def registrations(request):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CustomUser, UserHistory, User
-from .serializers import UserSerializer, UserHistorySerializer, UserRegistrationSerializer, UserHistoryReturnSerializer, UserHistoryReturnNowSerializer, EEUserSerializer
+from .models import CustomUser, UserHistory
+from .serializers import UserSerializer, UserHistorySerializer, UserRegistrationSerializer, UserHistoryReturnSerializer, \
+    UserHistoryReturnNowSerializer, UserLoginSerializer
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 
-class UserAPIView(APIView):
+# class UserAPIView(APIView):
+#     def post(self, request):
+#         print('asdasd')
+#         serializer = EEUserSerializer(data=request.data)
+#         print(serializer.initial_data)
+#         print(serializer.is_valid())
+#         #print(serializer.validated_data['login'])
+#         #print(serializer.validated_data['password'])
+#         #user = authenticate(username=serializer.initial_data.get('login'), password=serializer.initial_data.get('password'))
+#         users = User.objects.all()
+#         flag2 = False
+#         #for i in users:
+#             #if i.login == serializer.initial_data.get('login') and i.password == serializer.initial_data.get('password'):
+#         print()
+#         username = serializer.initial_data.get('login')
+#         password = serializer.initial_data.get('password')
+#         user = authenticate(username=username,
+#                             password=password)
+#         if user is not None:
+#             flag2 = True
+#             login(request, user)
+#             print(request.user.id)
+#
+#         print(request.user.id)
+#             #login(request, user)
+#             #print(request.user.id)
+#
+#         if flag2 == True:
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+# class UserRegistreationAPIView(APIView):
+#     def post(self, request):
+#         print('Yes')
+#         serializer = UserRegistrationSerializer(data=request.data)
+#         if serializer.is_valid():
+#             print(serializer.validated_data['login'])
+#             buf = User.objects.create(login = serializer.validated_data['login'], password = serializer.validated_data['password'])
+#             buf.save()
+#             login(request, buf)
+#             users = User.objects.all()
+#             print(users)
+#             print(request.user.id)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         print(serializer.is_valid())
+#         print(serializer.errors)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ID_USER = int()
+class UserRegistrationView(APIView):
     def post(self, request):
-        print('asdasd')
-        serializer = EEUserSerializer(data=request.data)
-        print(serializer)
-        serializer.is_valid()
-        if True:
-            arr = CustomUser.objects.all()
-            flag = True
-
-            if flag == True:
-                #user = authenticate(username = serializer.validated_data['login'], password = serializer.validated_data['password'])
-                #login(request, user)
-                #print(request.user.id)
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class UserRegistreationAPIView(APIView):
-    def post(self, request):
-        print('Yes')
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            print(serializer.validated_data['login'])
-            buf = User.objects.create(login = serializer.validated_data['login'], password = serializer.validated_data['password'])
-            buf.save()
-            users = User.objects.all()
-            print(users)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+        print(serializer)
         print(serializer.is_valid())
-        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class UserLoginView(APIView):
+    def post(self, request):
+        logout(request)
+        serializer = UserLoginSerializer(data=request.data)
+        print(serializer)
+        print(serializer.is_valid())
+        if serializer.is_valid():
+            user = serializer.validated_data
+            token, created = Token.objects.get_or_create(user=user)
+            login(request, user)
+            global ID_USER
+            ID_USER = request.user.id
+            print(request.user.is_authenticated)
+            print(request.user.is_authenticated)
+            print(request.user.is_authenticated)
+            print(request.user.is_authenticated)
+            print(request.user.id)
+            print(request.user.id)
+            print(request.user.id)
+            print(request.user.id)
+            print(request.user.id)
+            print(request.session)
+            print(request.session)
+            print(request.session)
+            return Response({'token': token.key}, status=status.HTTP_200_OK)
+
+        print(serializer)
+        print(request.user.id)
+        print(request.user.id)
+        print(request.user.id)
+        print(request.user.id)
+        print(request.user.id)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 bmr = float()
 body_mass = float()
 eff = float()
@@ -100,9 +164,9 @@ class UserHistoryCreateAPIView(APIView):
             prot = bmr * 0.15 / 4
             fats = bmr * 0.25 / 9
             hydra = (bmr - prot * 4 - fats * 9) / 4
-            zapros = UserHistory(user_id=int(1), age=age, height=height, weight=weight, gender=gender, bmr=bmr,
-                                 body_mass_index=imt, effectiv_weight=eff_weight, protein=prot, fats=fats,
-                                 carbohydrates=hydra)
+            zapros = UserHistory(user_id=ID_USER, age=age, height=height, weight=weight, gender=gender, bmr=round(bmr, 2),
+                                 body_mass_index=round(imt, 2), effectiv_weight=round(eff_weight, 2), protein=round(prot, 2), fats=round(fats, 2),
+                                 carbohydrates=round(hydra, 2))
             zapros.save()
             # Сохраняем объект, если данные валидны
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -119,11 +183,23 @@ class UserHistoryCreateAPIView(APIView):
 
 class UserHistoryReturnAPIView(APIView):
     def get(self, request):
+        print(request.session)
+        print(request.session)
+        print(request.session)
+        print(request.session)
+        print(request.user.id)
+        print(request.user.id)
+        print(request.user.id)
+        print(request.user.id)
+        print(request.user.id)
+        print(request.user.id)
+        print(ID_USER)
         data = UserHistory.objects.all()
         arr = []
         for el in data:
-            if el.user_id == request.user.id:
+            if el.user_id == ID_USER:
                 arr.append(el)
+
         data = arr
         print(data)
         serializer = UserHistoryReturnSerializer(data, many=True)

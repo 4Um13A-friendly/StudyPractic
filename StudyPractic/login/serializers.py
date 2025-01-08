@@ -1,20 +1,21 @@
+from django.contrib.auth import authenticate
 from rest_framework import serializers
-from .models import CustomUser, UserHistory, User
+from .models import CustomUser, UserHistory
 
-class EEUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['login', 'password']
+# class EEUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['login', 'password']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username', 'password']
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['login', 'password']
+# class UserRegistrationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['login', 'password']
 
 class UserHistorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,3 +39,29 @@ class UserHistoryReturnNowSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserHistory
         fields = ['bmr', 'body_mass_index', 'effectiv_weight', 'protein', 'fats', 'carbohydrates']
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'password']
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password']
+        )
+        return user
+
+
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(username=data['username'], password=data['password'])
+        if user is None:
+            raise serializers.ValidationError("Неверное имя пользователя или пароль.")
+        return user

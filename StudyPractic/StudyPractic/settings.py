@@ -97,7 +97,10 @@ DATABASES = {
     }
 }
 
-
+AUTHENTICATION_BACKENDS = [
+    #'login.authentication_backends.CustomAuthBackend',  # путь к вашему кастомному бэкенду
+    'django.contrib.auth.backends.ModelBackend',  # это для использования стандартного бэкенда (опционально)
+]
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -133,7 +136,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 STATICFILES_DIRS = [BASE_DIR / "static/"]
 
 # Default primary key field type
