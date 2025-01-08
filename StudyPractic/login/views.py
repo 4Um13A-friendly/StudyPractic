@@ -176,7 +176,9 @@ class UserHistoryCreateAPIView(APIView):
     def get(self, request):
         print('asdasd')
         back = UserHistory.objects.all()
-        data = back[0]
+        print(back)
+        data = back[len(back) - 1]
+        print (data)
         serializer = UserHistoryReturnNowSerializer(data, many=False)
         print(data.bmr)
         return Response(serializer.data)
@@ -200,7 +202,8 @@ class UserHistoryReturnAPIView(APIView):
             if el.user_id == ID_USER:
                 arr.append(el)
 
-        data = arr
+        data = arr#.reverse()
+        data.reverse()
         print(data)
         serializer = UserHistoryReturnSerializer(data, many=True)
         return Response (serializer.data)
