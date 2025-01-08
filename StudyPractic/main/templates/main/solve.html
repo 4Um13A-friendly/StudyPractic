@@ -1,0 +1,13 @@
+{% extends 'main/layout.html' %}
+{% block title %}Расчет{% endblock %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.age }}<br>
+        {{ form.height }}<br>
+        {{ form.weight }}<br>
+        {{ form.gender }}<br>
+        <button type="submit">Расчитать</button>
+    </form>
+    <a href="{% url 'history' %}"><button>История рассчетов</button></a>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'main/layout.html' %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.login }}<br>
+        {{ form.password }}<br>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <a href="{% url 'authterisation' %}"><button>Авторизация</button></a>
+{% endblock %}

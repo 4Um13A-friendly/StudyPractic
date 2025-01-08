@@ -1,0 +1,17 @@
+{% extends 'main/layout.html' %}
+{% block title %}История{% endblock %}
+{% block content %}
+    {% for el in form %}
+        {{ el.date }}
+        {{ el.age }}
+        {{ el.height }}
+        {{ el.weight }}
+        {{ el.bmr }}
+        {{ el.body_mass_index }}
+        {{ el.effectiv_weight }}
+        {{ el.protein }}
+        {{ el.fats }}
+        {{ el.carbohydrates }}<br>
+    {% endfor %}
+    <a href="{% url 'solve' %}"><button>Назад</button></a>
+{% endblock %}
